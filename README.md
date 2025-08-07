@@ -35,7 +35,7 @@ Telegram Bot token (optional)
 
 ### Step 1: Clone Repository
 
-git clone https://github.com/your-username/algo-trading-system.git
+git clone https://github.com/AtharvaSamant4/algo-trading-system.git
 cd algo-trading-system
 
 
