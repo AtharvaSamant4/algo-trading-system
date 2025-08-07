@@ -1,7 +1,3 @@
-
-
-
-```markdown
 # 🚀 Algorithmic Trading System
 
 **Professional ML-powered trading bot** that combines RSI + Moving Averages with machine learning for automated BSE stock trading.
@@ -26,57 +22,98 @@
 | **Win Rate** | 0% (2 trades) | ⚠️ |
 | **ROI** | -0.16% | ✅ Excellent risk control |
 | **Max Drawdown** | 0.2% | ✅ Outstanding |
-| **Strategy** | RSI  50-DMA + Volume > 1.2x average
-- **Sell Signal**: RSI > 65 OR 20-DMA =1.5.0
-numpy>=1.24.0
-pandas-ta>=0.3.14b
-gspread>=5.7.0
-python-telegram-bot>=20.0
-requests>=2.28.0
-scikit-learn>=1.2.0
-python-dotenv>=0.19.0
-```
+| **Strategy** | RSI < 35 + MA crossover + Volume confirmation | ✅ |
 
-## 📈 Technical Indicators
+## 🚀 Installation & Setup
 
-- **RSI (14-period)**: Momentum oscillator
-- **Moving Averages**: 20-day and 50-day SMAs
-- **MACD**: Trend-following momentum
-- **Volume Analysis**: Confirmation signals
-- **Volatility**: Risk assessment
+### Prerequisites
+Python 3.8+
+Git (for cloning)
+Google Cloud Console account (for Sheets API)
+Alpha Vantage API key (optional)
+Telegram Bot token (optional)
 
-## 🐛 Troubleshooting
+### Step 1: Clone Repository
 
-**Google Sheets Authentication Failed**:
-```
-# Ensure google_credentials.json is OAuth2 format with "installed" key
-# Not service account format
-```
+git clone https://github.com/your-username/algo-trading-system.git
+cd algo-trading-system
 
-**No Data Fetched**:
-```
-# Check Alpha Vantage API key in .env file
-# Verify internet connection
-```
 
-**Module Not Found**:
-```
-# Ensure virtual environment is activated
-# Run: pip install -r requirements.txt
-```
+### Step 2: Create Virtual Environment
+
+Create virtual environment
+python -m venv algo_trading_env
+
+Activate virtual environment
+algo_trading_env\Scripts\activate
+
+
+### Step 3: Install Dependencies
+pip install -r requirements.txt
+
+
+### Step 4: Configuration
+
+**Environment Variables** - Create `.env` file:
+ALPHA_VANTAGE_KEY=your_api_key_here
+TELEGRAM_TOKEN=your_telegram_bot_token
+TELEGRAM_CHAT_ID=your_chat_id
+
+**Google Sheets** - Add `google_credentials.json` (OAuth2 format) to project root
+
+### Step 5: Run System
+python src/main.py
+
+
+## 📊 Live Dashboard
+
+Your **Google Sheets dashboard** automatically creates:
+- **Trade Log**: All trades with P&L, RSI, ML predictions
+- **Portfolio Summary**: Real-time metrics with ✅/❌ status indicators
+- **Performance Analytics**: ML accuracy and risk metrics
+
+## 📁 Project Structure
+
+algo-trading-system/
+├── src/
+│ ├── main.py # Main execution entry point
+│ ├── data_manager.py # 6-month BSE data fetching
+│ ├── strategy.py # RSI+MA+ML trading strategy
+│ ├── ml_engine.py # Machine learning pipeline
+│ ├── sheets_logger.py # Google Sheets integration
+│ ├── telegram_bot.py # Telegram notifications
+│ └── fetch_data.py # Core data utilities
+├── requirements.txt # Python dependencies
+├── .env # Environment variables
+├── google_credentials.json # Google OAuth2 credentials
+└── README.md # This file
+
+
+## 🎮 Usage
+
+**Single Analysis Run**:
+python src/main.py
+
+
+**Scheduled Trading** (prompted after successful run):
+- **09:30 AM IST**: Pre-market analysis
+- **03:30 PM IST**: Post-market analysis
+
+## ⚙️ Strategy Details
+
+### Trading Logic
+- **Buy Signal**: RSI < 35 + 20-DMA > 50-DMA + Volume > 1.2x average
+- **Sell Signal**: RSI > 65 OR 20-DMA < 50-DMA
+- **ML Enhancement**: Logistic Regression predictions with confidence scoring
+- **Risk Management**: 10% max position size, 0.2% transaction costs
+
+### Performance Metrics
+- **Conservative Approach**: Quality signals over quantity
+- **Risk-First**: Minimal drawdown prioritized over high returns
+- **Assignment Compliant**: Exactly 6 months backtesting period
+
 
 ## ⚠️ Disclaimer
 
 **This software is for educational and research purposes only.** Trading involves substantial risk of loss and is not suitable for all investors. Past performance is not indicative of future results. Always conduct your own research before making investment decisions.
 
-## 🏆 Key Achievements
-
-✅ **Assignment Compliance**: Strict 6-month backtesting  
-✅ **Professional Architecture**: Enterprise-grade modular design  
-✅ **Risk Management**: Outstanding 0.2% max drawdown  
-✅ **ML Integration**: 60.27% prediction accuracy  
-✅ **Real-time Integration**: Live Google Sheets + Telegram  
-✅ **Conservative Strategy**: Quality over quantity approach  
-
----
-**Built for algorithmic trading education and research** 📈🤖
