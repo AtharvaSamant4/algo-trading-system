@@ -1,6 +1,5 @@
-# **📋 UPDATED README WITH PROPER INSTALLATION STEPS**
 
-You're absolutely right! Here's the corrected README with proper git clone installation steps:
+
 
 ```markdown
 # 🚀 Algorithmic Trading System
