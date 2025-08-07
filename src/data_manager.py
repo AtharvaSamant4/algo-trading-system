@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class DataManager:
     def __init__(self):
-        self.alpha_vantage_key = os.getenv('ALPHA_VANTAGE_KEY', 'A8CPY8GOG5PYJU0F')
+        self.alpha_vantage_key = os.getenv('ALPHA_VANTAGE_KEY')
         
         self.bse_symbols = [
             'RELIANCE.BSE',
