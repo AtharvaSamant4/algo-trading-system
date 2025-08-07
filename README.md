@@ -73,22 +73,21 @@ Your **Google Sheets dashboard** automatically creates:
 - **Performance Analytics**: ML accuracy and risk metrics
 
 ## 📁 Project Structure
-'''
+
+```
 algo-trading-system/
 ├── src/
-│ ├── main.py # Main execution entry point
-│ ├── data_manager.py # 6-month BSE data fetching
-│ ├── strategy.py # RSI+MA+ML trading strategy
-│ ├── ml_engine.py # Machine learning pipeline
-│ ├── sheets_logger.py # Google Sheets integration
-│ ├── telegram_bot.py # Telegram notifications
-│ └── fetch_data.py # Core data utilities
-├── requirements.txt # Python dependencies
-├── .env # Environment variables
-├── google_credentials.json # Google OAuth2 credentials
-└── README.md # This file
+│   ├── main.py
+│   ├── data_manager.py  
+│   ├── strategy.py
+│   ├── ml_engine.py
+│   ├── sheets_logger.py
+│   └── telegram_bot.py
+├── .gitignore
+├── README.md
+└── requirements.txt
+```
 
-'''
 ## 🎮 Usage
 
 **Single Analysis Run**:
