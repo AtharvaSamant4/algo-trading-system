@@ -73,7 +73,7 @@ Your **Google Sheets dashboard** automatically creates:
 - **Performance Analytics**: ML accuracy and risk metrics
 
 ## 📁 Project Structure
-
+'''
 algo-trading-system/
 ├── src/
 │ ├── main.py # Main execution entry point
@@ -88,7 +88,7 @@ algo-trading-system/
 ├── google_credentials.json # Google OAuth2 credentials
 └── README.md # This file
 
-
+'''
 ## 🎮 Usage
 
 **Single Analysis Run**:
