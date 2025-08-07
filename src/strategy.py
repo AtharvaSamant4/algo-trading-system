@@ -36,10 +36,10 @@ class RSIMAStrategy:
             
             # Buy condition: RSI < 35 + MA crossover + Volume confirmation
             buy_condition = (
-                (df['RSI'] < 35) &
+                (df['RSI'] < 30) &
                 (df['MA_20'] > df['MA_50']) &
                 (df['Volume_Ratio'] > 1.2) &
-                (df['RSI'].shift(1) >= 35))
+                (df['RSI'].shift(1) >= 30))
             
             # Sell conditions: RSI > 65 or MA bearish crossover
             sell_condition = (
