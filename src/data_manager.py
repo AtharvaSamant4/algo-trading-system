@@ -7,29 +7,65 @@ import os
 import time
 from datetime import datetime, timedelta
 import logging
+import yfinance as yf  # Added for fallback functionality
+import pytz
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
 
 class DataManager:
     def __init__(self):
         self.alpha_vantage_key = os.getenv('ALPHA_VANTAGE_KEY')
         
         self.bse_symbols = [
-            'RELIANCE.BSE',
-            'HDFCBANK.BSE', 
-            'INFY.BSE'
+            'RELIANCE.NS',
+            'HDFCBANK.NS', 
+            'INFY.NS'
         ]
         
         self.successful_symbols = []
         self.failed_symbols = []
         self.api_calls_made = 0
     
+    def fetch_stock_data_yahoo_fallback(self, symbol):
+        """Yahoo Finance fallback for BSE symbols"""
+        try:
+            # Convert BSE to Yahoo Finance format
+            yahoo_symbol = symbol.replace('.BSE', '.BO')
+            logger.info(f"Trying Yahoo Finance fallback for {symbol} -> {yahoo_symbol}")
+            
+            # Fetch exactly 6 months of data
+            ticker = yf.Ticker(yahoo_symbol)
+            print(yahoo_symbol)
+            df = ticker.history(period="6mo")
+            
+            if not df.empty:
+                # Standardize column names to match Alpha Vantage format
+                required_columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+                df = df[required_columns]
+                df.columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+        
+                # Apply same 6-month filtering as Alpha Vantage method
+                six_months_data = self.limit_to_six_months(df)
+                
+                logger.info(f"Yahoo Finance success for {symbol}: {len(six_months_data)} rows")
+                logger.info(f"Date range: {six_months_data.index[0].date()} to {six_months_data.index[-1].date()}")
+                
+                return six_months_data
+            else:
+                logger.warning(f"No Yahoo Finance data for {symbol}")
+                return pd.DataFrame()
+                
+        except Exception as e:
+            logger.error(f"Yahoo Finance fallback failed for {symbol}: {e}")
+            return pd.DataFrame()
+    
     def fetch_stock_data(self, symbol):
         """Fetch exactly 6 months of data as per assignment requirements"""
         url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={self.alpha_vantage_key}&outputsize=compact&datatype=json"
-        
+        # https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=demo
         try:
             logger.info(f"Fetching {symbol} (6 months data only)...")
             
@@ -40,7 +76,15 @@ class DataManager:
             time_series = data.get("Time Series (Daily)")
             if not time_series:
                 logger.error(f"No data found for {symbol}")
-                return pd.DataFrame()
+                # FALLBACK: Try Yahoo Finance if Alpha Vantage fails
+                logger.info(f"Alpha Vantage failed for {symbol}, trying Yahoo Finance fallback...")
+                fallback_data = self.fetch_stock_data_yahoo_fallback(symbol)
+                if not fallback_data.empty:
+                    logger.info(f"Yahoo Finance fallback successful for {symbol}")
+                    return fallback_data
+                else:
+                    logger.error(f"Both Alpha Vantage and Yahoo Finance failed for {symbol}")
+                    return pd.DataFrame()
             
             df = pd.DataFrame.from_dict(time_series, orient='index')
             df.index = pd.to_datetime(df.index)
@@ -59,24 +103,38 @@ class DataManager:
             
         except Exception as e:
             logger.error(f"Error fetching {symbol}: {str(e)}")
-            return pd.DataFrame()
+            # FALLBACK: Try Yahoo Finance if Alpha Vantage has connection issues
+            logger.info(f"Alpha Vantage connection error for {symbol}, trying Yahoo Finance fallback...")
+            fallback_data = self.fetch_stock_data_yahoo_fallback(symbol)
+            if not fallback_data.empty:
+                logger.info(f"Yahoo Finance fallback successful for {symbol}")
+                return fallback_data
+            else:
+                logger.error(f"Both Alpha Vantage and Yahoo Finance failed for {symbol}")
+                return pd.DataFrame()
     
     def limit_to_six_months(self, df):
-        """Extract exactly the last 6 months of data from today"""
+        """Extract exactly the last 6 months of data with timezone handling"""
         if df.empty:
             return df
         
-        today = datetime.now()
+        # Use timezone-aware timestamps
+        tz = pytz.timezone('Asia/Kolkata')
+        today = datetime.now(tz)
         six_months_ago = today - pd.DateOffset(months=6)
+        
+        # Convert both to tz-aware if needed
+        if not df.index.tz:
+            df.index = df.index.tz_localize('Asia/Kolkata')
+        
         six_months_data = df[df.index >= six_months_ago]
         
-        # Fallback if insufficient data
+        # Existing fallback logic
         if len(six_months_data) < 50:
             logger.warning(f"Only {len(six_months_data)} rows available for 6 months")
             six_months_data = df.tail(100) if len(df) >= 100 else df
         
         logger.info(f"Filtered from {len(df)} rows to {len(six_months_data)} rows (6 months)")
-        
         return six_months_data
     
     def get_nifty_data_smart(self, max_symbols=3, min_rows=50):
