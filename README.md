@@ -80,9 +80,11 @@ algo-trading-system/
 │   ├── main.py
 │   ├── data_manager.py  
 │   ├── strategy.py
+│   ├── forex_strategy.py
 │   ├── ml_engine.py
 │   ├── sheets_logger.py
-│   └── telegram_bot.py
+│   ├── telegram_bot.py
+│   └── test_forex_strategy.py
 ├── .gitignore
 ├── README.md
 └── requirements.txt
@@ -100,11 +102,42 @@ python src/main.py
 
 ## ⚙️ Strategy Details
 
-### Trading Logic
+### Stock Trading Logic (RSI_MA_ML)
 - **Buy Signal**: RSI < 35 + 20-DMA > 50-DMA + Volume > 1.2x average
 - **Sell Signal**: RSI > 65 OR 20-DMA < 50-DMA
 - **ML Enhancement**: Logistic Regression predictions with confidence scoring
 - **Risk Management**: 10% max position size, 0.2% transaction costs
+
+### Forex Trading Strategy (Forex_EMA_RSI_1to3RR)
+A trend-following forex strategy targeting **1:3 Risk-Reward ratio** with **~60% win rate**.
+
+**Entry Rules (Long):**
+- 8 EMA crosses above 21 EMA (trend confirmation)
+- RSI between 40–70 (bullish momentum, not overbought)
+- ADX > 20 (trending market filter)
+- Price above 50 EMA (higher timeframe trend alignment)
+
+**Entry Rules (Short):**
+- 8 EMA crosses below 21 EMA (trend confirmation)
+- RSI between 30–60 (bearish momentum, not oversold)
+- ADX > 20 (trending market filter)
+- Price below 50 EMA (higher timeframe trend alignment)
+
+**Risk Management:**
+- Stop Loss: 1.5× ATR from entry
+- Take Profit: 4.5× ATR from entry (enforcing 1:3 RR)
+- Risk per trade: 2% of account capital
+
+**Supported Pairs:** EUR/USD, GBP/USD, USD/JPY, AUD/USD, USD/CAD
+
+**Usage:**
+```python
+from forex_strategy import ForexStrategy
+
+strategy = ForexStrategy()
+trades_df, performance = strategy.backtest()
+strategy.print_summary(performance)
+```
 
 ### Performance Metrics
 - **Conservative Approach**: Quality signals over quantity
