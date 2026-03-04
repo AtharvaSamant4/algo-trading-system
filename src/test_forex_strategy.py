@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from forex_strategy import ForexStrategy
-from run_backtest import generate_regime_forex_data
+from run_backtest import generate_regime_forex_data, MIN_RR_RATIO, MIN_WIN_RATE
 
 
 def _make_sample_data(rows=120, trend='up'):
@@ -248,16 +248,16 @@ class TestBacktestTargets(unittest.TestCase):
 
     def test_win_rate_meets_target(self):
         self.assertGreaterEqual(
-            self.performance['Win_Rate'], 60.0,
+            self.performance['Win_Rate'], MIN_WIN_RATE,
             f"Win rate {self.performance['Win_Rate']:.1f}% "
-            f"should be >= 60%",
+            f"should be >= {MIN_WIN_RATE}%",
         )
 
     def test_risk_reward_meets_target(self):
         self.assertGreaterEqual(
-            self.performance['Risk_Reward_Ratio'], 2.5,
+            self.performance['Risk_Reward_Ratio'], MIN_RR_RATIO,
             f"RR ratio {self.performance['Risk_Reward_Ratio']:.2f} "
-            f"should be >= 2.5 (target 1:3)",
+            f"should be >= {MIN_RR_RATIO} (target 1:3)",
         )
 
     def test_more_tp_than_sl_exits(self):

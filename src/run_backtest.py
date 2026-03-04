@@ -15,6 +15,11 @@ import pandas as pd
 from datetime import datetime
 from forex_strategy import ForexStrategy
 
+# Validation thresholds (slightly below the theoretical 1:3 = 3.0 RR
+# to allow for transaction costs while still confirming the design intent).
+MIN_RR_RATIO = 2.5
+MIN_WIN_RATE = 60.0
+
 
 # ---------------------------------------------------------------------------
 # Data generation
@@ -182,11 +187,11 @@ def run_backtest():
     print("=" * 70)
     print("TARGET VALIDATION")
     print("=" * 70)
-    print(f"  Risk-Reward Ratio : {rr:.2f}  (target ≥ 2.50)")
-    print(f"  Win Rate          : {wr:.1f}%  (target ≥ 60.0%)")
+    print(f"  Risk-Reward Ratio : {rr:.2f}  (target ≥ {MIN_RR_RATIO})")
+    print(f"  Win Rate          : {wr:.1f}%  (target ≥ {MIN_WIN_RATE}%)")
     print(f"  TP / SL exits     : {tp_exits} / {sl_exits}")
-    rr_ok = rr >= 2.50
-    wr_ok = wr >= 60.0
+    rr_ok = rr >= MIN_RR_RATIO
+    wr_ok = wr >= MIN_WIN_RATE
     print(f"  RR target met     : {'✅ YES' if rr_ok else '❌ NO'}")
     print(f"  WR target met     : {'✅ YES' if wr_ok else '❌ NO'}")
     print("=" * 70)
