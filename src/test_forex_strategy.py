@@ -166,7 +166,6 @@ class TestTradeExecution(unittest.TestCase):
     def test_long_take_profit_pnl_is_3x_stop_loss(self):
         strategy = ForexStrategy()
         atr = 0.0050
-        entry = 1.1000
         sl_dist = atr * strategy.atr_sl_multiplier
         tp_dist = atr * strategy.atr_tp_multiplier
 
@@ -179,7 +178,6 @@ class TestTradeExecution(unittest.TestCase):
     def test_short_take_profit_pnl_is_3x_stop_loss(self):
         strategy = ForexStrategy()
         atr = 0.0050
-        entry = 1.1000
         sl_dist = atr * strategy.atr_sl_multiplier
         tp_dist = atr * strategy.atr_tp_multiplier
 

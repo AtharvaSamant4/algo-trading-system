@@ -302,7 +302,7 @@ class ForexStrategy:
 
     def _create_trade_record(self, pair, entry_date, exit_date, direction,
                              entry_price, exit_price, pnl, exit_reason):
-        """Create a standardised trade record"""
+        """Create a standardized trade record"""
         cost = abs(entry_price * self.transaction_cost) + abs(
             exit_price * self.transaction_cost
         )
