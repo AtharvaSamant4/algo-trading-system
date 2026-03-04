@@ -223,7 +223,15 @@ class ForexStrategy:
         return pd.DataFrame(), self._get_empty_performance()
 
     def _execute_trades(self, signals, df, pair):
-        """Execute trades with 1:3 RR stop-loss and take-profit enforcement"""
+        """Execute trades with 1:3 RR stop-loss and take-profit enforcement.
+
+        When both SL and TP could be triggered on the same bar, the Open
+        price is used to determine which was hit first:
+        - If the Open already exceeds SL or TP, that exit is used.
+        - Otherwise, the Open's position relative to the entry price
+          determines whether the bar moved favourably (TP first) or
+          unfavourably (SL first).
+        """
         trades = []
         in_position = False
         position_direction = 0
@@ -241,39 +249,76 @@ class ForexStrategy:
 
             # Check exit conditions for open positions
             if in_position:
+                current_open = df.loc[date, 'Open']
+                current_high = df.loc[date, 'High']
+                current_low = df.loc[date, 'Low']
+
+                exit_reason = None
+                exit_price = None
+
                 if position_direction == 1:  # Long position
-                    current_high = df.loc[date, 'High']
-                    current_low = df.loc[date, 'Low']
-                    if current_low <= stop_loss:
-                        pnl = stop_loss - entry_price
+                    sl_hit = current_low <= stop_loss
+                    tp_hit = current_high >= take_profit
+
+                    if sl_hit and tp_hit:
+                        # Both levels touched on the same bar — use Open
+                        # to infer which was reached first.
+                        if current_open <= stop_loss:
+                            exit_reason = 'Stop Loss Hit'
+                            exit_price = stop_loss
+                        elif current_open >= take_profit:
+                            exit_reason = 'Take Profit Hit'
+                            exit_price = take_profit
+                        elif current_open >= entry_price:
+                            exit_reason = 'Take Profit Hit'
+                            exit_price = take_profit
+                        else:
+                            exit_reason = 'Stop Loss Hit'
+                            exit_price = stop_loss
+                    elif tp_hit:
+                        exit_reason = 'Take Profit Hit'
+                        exit_price = take_profit
+                    elif sl_hit:
+                        exit_reason = 'Stop Loss Hit'
+                        exit_price = stop_loss
+
+                    if exit_reason is not None:
+                        pnl = exit_price - entry_price
                         trades.append(self._create_trade_record(
                             pair, entry_date, date, 'LONG', entry_price,
-                            stop_loss, pnl, 'Stop Loss Hit'
-                        ))
-                        in_position = False
-                    elif current_high >= take_profit:
-                        pnl = take_profit - entry_price
-                        trades.append(self._create_trade_record(
-                            pair, entry_date, date, 'LONG', entry_price,
-                            take_profit, pnl, 'Take Profit Hit'
+                            exit_price, pnl, exit_reason,
                         ))
                         in_position = False
 
                 elif position_direction == -1:  # Short position
-                    current_high = df.loc[date, 'High']
-                    current_low = df.loc[date, 'Low']
-                    if current_high >= stop_loss:
-                        pnl = entry_price - stop_loss
+                    sl_hit = current_high >= stop_loss
+                    tp_hit = current_low <= take_profit
+
+                    if sl_hit and tp_hit:
+                        if current_open >= stop_loss:
+                            exit_reason = 'Stop Loss Hit'
+                            exit_price = stop_loss
+                        elif current_open <= take_profit:
+                            exit_reason = 'Take Profit Hit'
+                            exit_price = take_profit
+                        elif current_open <= entry_price:
+                            exit_reason = 'Take Profit Hit'
+                            exit_price = take_profit
+                        else:
+                            exit_reason = 'Stop Loss Hit'
+                            exit_price = stop_loss
+                    elif tp_hit:
+                        exit_reason = 'Take Profit Hit'
+                        exit_price = take_profit
+                    elif sl_hit:
+                        exit_reason = 'Stop Loss Hit'
+                        exit_price = stop_loss
+
+                    if exit_reason is not None:
+                        pnl = entry_price - exit_price
                         trades.append(self._create_trade_record(
                             pair, entry_date, date, 'SHORT', entry_price,
-                            stop_loss, pnl, 'Stop Loss Hit'
-                        ))
-                        in_position = False
-                    elif current_low <= take_profit:
-                        pnl = entry_price - take_profit
-                        trades.append(self._create_trade_record(
-                            pair, entry_date, date, 'SHORT', entry_price,
-                            take_profit, pnl, 'Take Profit Hit'
+                            exit_price, pnl, exit_reason,
                         ))
                         in_position = False
 
